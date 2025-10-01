@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdf2mp3"
+version = "1.0.0"
+description = "Convert PDFs to MP3 audiobooks using Microsoft Edge neural voices."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Raphael Medeiros", email = "pdf2mp3@byraphaelmedeiros.com" }]
+maintainers = [{ name = "Raphael Medeiros", email = "pdf2mp3@byraphaelmedeiros.com" }]
+requires-python = ">=3.9"
+dependencies = [
+  "pdfminer.six>=20250506,<20260000",
+  "edge-tts>=7.2.3,<8.0.0",
+  "pydub>=0.25.1,<0.26.0",
+  "tqdm>=4.67.1,<5.0.0"
+]
+
+[project.scripts]
+pdf2mp3 = "pdf2mp3:main"
+
+[project.urls]
+"Homepage" = "https://github.com/byraphaelmedeiros/pdf2mp3"
+"Bug Tracker" = "https://github.com/byraphaelmedeiros/pdf2mp3/issues"

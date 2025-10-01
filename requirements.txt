@@ -1,0 +1,4 @@
+pdfminer.six==20250506
+edge-tts==7.2.3
+pydub==0.25.1
+tqdm==4.67.1
