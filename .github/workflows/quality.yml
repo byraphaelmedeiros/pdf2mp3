@@ -1,0 +1,89 @@
+name: Quality gates
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ffmpeg
+      - name: Verify FFmpeg before running the gate
+        run: ffmpeg -version
+      - name: Verify ffprobe before running the gate
+        run: ffprobe -version
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Run release profile against the published baseline
+        run: python scripts/quality.py release --base v1.0.0
+      - name: Preserve gate evidence and tested distributions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-evidence
+          path: |
+            .quality/runs/*/*.json
+            .quality/runs/*/*.log
+            .quality/runs/*/*.txt
+            .quality/runs/*/dist/*
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  compatibility:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        include:
+          - os: macos-latest
+            python: '3.10'
+          - os: macos-latest
+            python: '3.14'
+          - os: windows-latest
+            python: '3.10'
+          - os: windows-latest
+            python: '3.14'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ffmpeg
+      - if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - if: runner.os == 'Windows'
+        name: Install audio tools with bounded retries
+        shell: pwsh
+        run: |
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            choco install ffmpeg --no-progress -y
+            if ($LASTEXITCODE -eq 0 -and
+                (Get-Command ffmpeg -ErrorAction SilentlyContinue) -and
+                (Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+              break
+            }
+            if ($attempt -eq 3) { throw "FFmpeg installation failed after three attempts" }
+            Start-Sleep -Seconds 10
+          }
+      - name: Verify FFmpeg before running tests
+        run: ffmpeg -version
+      - name: Verify ffprobe before running tests
+        run: ffprobe -version
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+      - name: Build and smoke installed wheel and sdist
+        run: python scripts/package_check.py .quality/compatibility

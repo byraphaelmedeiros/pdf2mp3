@@ -7,6 +7,7 @@ These tests validate the behavior of normalize_lang:
 """
 
 import pytest
+
 from pdf2mp3 import normalize_lang
 
 

@@ -9,13 +9,13 @@ Example:
 """
 
 from .pdf2mp3 import (
-    normalize_lang,
-    extract_text_from_pdf,
     clean_text,
-    split_into_chunks,
-    sanitize_for_tts,
-    tts_chunk_with_retry,
+    extract_text_from_pdf,
     main,
+    normalize_lang,
+    sanitize_for_tts,
+    split_into_chunks,
+    tts_chunk_with_retry,
 )
 
 __all__ = [

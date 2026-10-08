@@ -12,8 +12,9 @@ and international open-source standards.
 
 import subprocess
 import sys
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 def test_cli_help():
@@ -25,6 +26,7 @@ def test_cli_help():
         [sys.executable, "-m", "pdf2mp3", "--help"],
         capture_output=True,
         text=True,
+        timeout=20,
     )
 
     # argparse --help prints to stdout, not stderr
@@ -39,20 +41,21 @@ def test_cli_invalid_pdf():
     and prints a meaningful error message to stderr.
     """
     result = subprocess.run(
-        [sys.executable, "-m", "pdf2mp3", "nonexistent.pdf"],
+        [sys.executable, "-m", "pdf2mp3", "convert", "nonexistent.pdf"],
         capture_output=True,
         text=True,
+        timeout=20,
     )
 
     assert result.returncode != 0
     err = result.stderr.lower()
 
-    # The program prints: "[error] PDF not found: <path>"
-    assert "[error]" in err or "pdf not found" in err
+    assert result.returncode == 1
+    assert "input_missing" in err
 
 
 @pytest.mark.asyncio
-async def test_tts_chunk_with_retry_mocked():
+async def test_tts_chunk_with_retry_mocked(monkeypatch):
     """
     Ensure that tts_chunk_with_retry fails with RuntimeError after
     exhausting retries when the underlying TTS call always fails.
@@ -61,9 +64,12 @@ async def test_tts_chunk_with_retry_mocked():
     """
     from pdf2mp3 import tts_chunk_with_retry
 
+    async def sleep(_):
+        pass
+
+    monkeypatch.setattr("pdf2mp3.pdf2mp3.asyncio.sleep", sleep)
+
     # Patch the symbol where tts_chunk_with_retry resolves it
     with patch("pdf2mp3.pdf2mp3.tts_chunk", side_effect=Exception("fake error")):
         with pytest.raises(RuntimeError):
-            await tts_chunk_with_retry(
-                "Hello", "en-US-AriaNeural", "+0%", "+0%", retries=2
-            )
+            await tts_chunk_with_retry("Hello", "en-US-AriaNeural", "+0%", "+0%", retries=2)

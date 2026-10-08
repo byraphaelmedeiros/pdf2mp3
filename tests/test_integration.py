@@ -6,9 +6,11 @@ external services (e.g., network TTS).
 """
 
 from pathlib import Path
-from reportlab.pdfgen import canvas
+
 from reportlab.lib.pagesizes import letter
-from pdf2mp3 import extract_text_from_pdf, split_into_chunks, sanitize_for_tts
+from reportlab.pdfgen import canvas
+
+from pdf2mp3 import extract_text_from_pdf, sanitize_for_tts, split_into_chunks
 
 
 def create_sample_pdf(path: Path, text: str = "Hello from pdf2mp3 test!"):

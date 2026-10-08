@@ -5,6 +5,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv-dev/
 env/
 venv/
 
@@ -40,6 +41,13 @@ coverage.xml
 .cache
 nosetests.xml
 pytest.xml
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.quality/
+mutants/
+
 
 # IDEs
 .idea/
@@ -50,3 +58,9 @@ pytest.xml
 .sample/
 *.pdf
 *.mp3
+/local/
+.DS_Store
+
+# Checkout-local agent instructions and development notes
+AGENTS.md
+/docs/development/

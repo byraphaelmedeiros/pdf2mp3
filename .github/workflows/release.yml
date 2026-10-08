@@ -2,36 +2,60 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    tags: ['v*']
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-publish:
+  version:
     runs-on: ubuntu-latest
-
-    environment: pypi
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
+      - run: python -m pip install packaging
+      - name: Require final matching version and dated changelog
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python scripts/release_check.py --tag "$RELEASE_TAG"
 
-      - name: Install dependencies
+  quality:
+    needs: version
+    uses: ./.github/workflows/quality.yml
+
+  publish:
+    needs: [version, quality]
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: quality-evidence
+          path: evidence
+      - name: Verify and select the tested artifacts without rebuilding
         run: |
-          python -m pip install --upgrade pip
-          pip install build twine
-
-      - name: Build package
-        run: python -m build
-
-      - name: Check package
-        run: twine check dist/*
-
-      - name: Publish to PyPI
+          python - <<'PY'
+          import hashlib, json, pathlib, shutil
+          root = pathlib.Path('evidence')
+          summaries = list(root.rglob('summary.json'))
+          assert len(summaries) == 1, 'Expected one release gate report'
+          report = summaries[0]
+          data = json.loads(report.read_text())
+          import os
+          assert data['status'] == 'PASS' and data['profile'] == 'release'
+          assert data['commit'] == os.environ['GITHUB_SHA']
+          hashes = json.loads(report.with_name('artifacts.json').read_text())
+          assert len(hashes) == 2
+          destination = pathlib.Path('dist')
+          destination.mkdir()
+          for name, expected in hashes.items():
+              source = report.parent / 'dist' / name
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == expected
+              shutil.copy2(source, destination / name)
+          PY
+      - name: Publish tested wheel and sdist
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
