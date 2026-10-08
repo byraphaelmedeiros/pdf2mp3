@@ -1,0 +1,9 @@
+include CHANGELOG.md CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md
+include pytest.ini requirements.txt requirements-dev.txt
+recursive-include docs *.md
+recursive-include scripts *.py *.json
+recursive-include tests *.py
+global-exclude AGENTS.md
+global-exclude .DS_Store
+prune docs/development
+prune local

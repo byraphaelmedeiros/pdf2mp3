@@ -7,7 +7,7 @@ These tests cover:
 - Sanitizing text for TTS consumption.
 """
 
-from pdf2mp3 import clean_text, split_into_chunks, sanitize_for_tts
+from pdf2mp3 import clean_text, sanitize_for_tts, split_into_chunks
 
 
 def test_clean_text_removes_hyphenation():
@@ -18,7 +18,7 @@ def test_clean_text_removes_hyphenation():
     cleaned = clean_text(raw)
 
     assert "multi-line" not in cleaned  # should not keep the hyphen
-    assert "multiline" in cleaned       # should merge properly
+    assert "multiline" in cleaned  # should merge properly
 
 
 def test_clean_text_preserves_content():
@@ -53,6 +53,6 @@ def test_sanitize_for_tts_quotes_ampersand():
     s = "“Hello” & hi’"
     sanitized = sanitize_for_tts(s)
 
-    assert '"' in sanitized     # smart quotes replaced with plain quotes
+    assert '"' in sanitized  # smart quotes replaced with plain quotes
     assert "&" not in sanitized
     assert "and" in sanitized

@@ -1,26 +1,80 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pdf2mp3"
-version = "1.0.0"
+version = "2.0.0"
 description = "Convert PDFs to MP3 audiobooks using Microsoft Edge neural voices."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Raphael Medeiros", email = "pdf2mp3@byraphaelmedeiros.com" }]
 maintainers = [{ name = "Raphael Medeiros", email = "pdf2mp3@byraphaelmedeiros.com" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-  "pdfminer.six>=20250506,<20260000",
+  "pdfminer.six>=20251230,<20260000",
   "edge-tts>=7.2.3,<8.0.0",
   "pydub>=0.25.1,<0.26.0",
-  "tqdm>=4.67.1,<5.0.0"
+  "tqdm>=4.67.1,<5.0.0",
+  "audioop-lts>=0.2.2,<0.3; python_version >= '3.13'"
+]
+
+[project.optional-dependencies]
+gtts = ["gTTS>=2.5.3,<3"]
+openai = ["openai[realtime]>=3.26.1,<4"]
+pyttsx3 = [
+  "pyttsx3>=2.90,<3",
+  "pyobjc>=10.3.1,<13; sys_platform == 'darwin'"
+]
+dev = [
+  "pytest==8.3.3", "pytest-asyncio==0.24.0", "reportlab==4.4.4",
+  "pytest-socket==0.8.1", "pytest-timeout==2.4.0", "hypothesis==6.168.5",
+  "coverage==7.16.2", "ruff==0.16.10", "mypy==2.4.0",
+  "bandit==1.9.4", "detect-secrets==1.5.0", "pip-audit==2.10.1",
+  "pip-licenses==5.5.5", "mutmut==3.8.0; sys_platform != 'win32'",
+  "build==1.6.1", "twine==7.0.0"
 ]
 
 [project.scripts]
 pdf2mp3 = "pdf2mp3:main"
 
+[tool.setuptools]
+packages = ["pdf2mp3"]
+
 [project.urls]
 "Homepage" = "https://github.com/byraphaelmedeiros/pdf2mp3"
 "Bug Tracker" = "https://github.com/byraphaelmedeiros/pdf2mp3/issues"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = [".quality", "mutants"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["pdf2mp3"]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["pydub.*", "tqdm.*", "gtts.*", "openai.*", "pyttsx3.*", "objc.*"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = true
+source = ["pdf2mp3"]
+patch = ["subprocess"]
+parallel = true
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+
+[tool.mutmut]
+source_paths = ["pdf2mp3/text.py", "pdf2mp3/pdf2mp3.py"]
+also_copy = ["pdf2mp3/__init__.py", "pdf2mp3/__main__.py", "pdf2mp3/cli.py", "pdf2mp3/openai_tts.py", "scripts"]
+pytest_add_cli_args_test_selection = ["tests/test_text.py", "tests/test_text_contract.py", "tests/test_lang.py", "tests/test_tts.py", "tests/test_cli.py"]
+pytest_add_cli_args = ["-q", "-p", "no:cacheprovider"]

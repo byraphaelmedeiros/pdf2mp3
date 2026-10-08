@@ -1,0 +1,7 @@
+{
+  "pdf2mp3.text.x_split_into_chunks__mutmut_9": {
+    "status": "timeout-as-survivor",
+    "reason": "Replacing 'while marker in text' with 'while marker not in text' creates an infinite loop for ordinary text. Confirmed by inspecting the generated diff. Count this known nonterminating mutant as surviving, never killed; no coverage or score credit.",
+    "source_sha256": "254ce8abea6f306228690ee2de166ab5a19faa05e9e4e68a6c9cf58ce1345648"
+  }
+}

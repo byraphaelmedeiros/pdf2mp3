@@ -1,0 +1,14 @@
+{
+  "licenses": [
+    "MIT", "MIT License", "MIT-0", "Apache-2.0", "Apache Software License",
+    "Apache License 2.0", "Apache-2.0 AND MIT", "Apache Software License; MIT License",
+    "Apache-2.0 OR BSD-3-Clause", "BSD License", "BSD-3-Clause", "BSD-2-Clause",
+    "ISC", "ISC License (ISCL)", "Python Software Foundation License", "PSF-2.0"
+  ],
+  "packages": {
+    "certifi": ["Mozilla Public License 2.0 (MPL 2.0)", "MPL-2.0"],
+    "edge-tts": ["GNU Lesser General Public License v3 (LGPLv3)", "LGPL-3.0-only"],
+    "pyttsx3": ["MPL-2.0"],
+    "tqdm": ["MPL-2.0 AND MIT"]
+  }
+}
