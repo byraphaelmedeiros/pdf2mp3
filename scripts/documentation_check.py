@@ -70,10 +70,24 @@ def check_documentation(root: Path) -> dict[str, int]:
             r"!?\[[^\]\n]*\]\((<[^>\n]+>|[^\s)\n]+)\)", _prose(document.read_text(encoding="utf-8"))
         ):
             target = target.strip("<>")
-            if urlsplit(target).scheme or target.startswith("//"):
+            parsed = urlsplit(target)
+            repository = "https://github.com/byraphaelmedeiros/pdf2mp3/blob/"
+            if target.startswith(repository):
+                # PyPI needs absolute URLs; validate our release links against this source.
+                _, separator, filename = parsed.path.removeprefix(
+                    "/byraphaelmedeiros/pdf2mp3/blob/"
+                ).partition("/")
+                if not separator:
+                    raise ValueError(f"broken reference in {document.relative_to(root)}: {target}")
+                anchor = parsed.fragment
+                destination = (root / unquote(filename)).resolve()
+            elif parsed.scheme or target.startswith("//"):
                 continue
-            filename, _, anchor = target.partition("#")
-            destination = (document.parent / unquote(filename)).resolve() if filename else document
+            else:
+                filename, _, anchor = target.partition("#")
+                destination = (
+                    (document.parent / unquote(filename)).resolve() if filename else document
+                )
             try:
                 relative = destination.relative_to(root)
                 check_local_files([relative.as_posix()])

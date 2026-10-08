@@ -1,5 +1,6 @@
 """The documentation gate rejects broken references and undocumented interfaces."""
 
+import re
 from pathlib import Path
 
 import pytest
@@ -49,6 +50,36 @@ def test_broken_local_reference_fails(documented_project, target):
     (documented_project / "README.md").write_text(f"[Broken]({target})\n")
     with pytest.raises(ValueError, match="reference"):
         checker.check_documentation(documented_project)
+
+
+@pytest.mark.parametrize(
+    "target,valid",
+    [
+        ("docs/api.md#helper", True),
+        ("docs/api.md#missing", False),
+        ("missing.md", False),
+        ("AGENTS.md", False),
+        ("local/inputs/private.txt", False),
+        ("../outside.md", False),
+    ],
+)
+def test_release_repository_links_are_validated_locally(documented_project, target, valid):
+    url = f"https://github.com/byraphaelmedeiros/pdf2mp3/blob/v2.0.0/{target}"
+    (documented_project / "README.md").write_text(f"[Release reference]({url})\n")
+    if valid:
+        assert checker.check_documentation(documented_project)["documents"] == 2
+    else:
+        with pytest.raises(ValueError, match="reference"):
+            checker.check_documentation(documented_project)
+
+
+def test_distributed_readme_links_work_outside_github():
+    root = Path(__file__).resolve().parents[1]
+    targets = re.findall(
+        r"\]\(([^\s)]+)\)", checker._prose((root / "README.md").read_text(encoding="utf-8"))
+    )
+    assert targets
+    assert all(target.startswith(("https://", "#")) for target in targets)
 
 
 def test_code_block_heading_is_not_a_link_anchor(documented_project):

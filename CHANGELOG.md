@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   or changing dependency resolution.
 
 ### Fixed
+- Use absolute release documentation links in the distributed README so they
+  work on PyPI; validate their files and heading anchors against release source.
 - Reject pyttsx3 WAV responses without audio samples as synthesis failures,
   preserving the input and previous destination instead of exporting only pauses.
 - Pass macOS `say` document text through stdin so leading hyphens cannot become
