@@ -6,7 +6,25 @@ updates:
       interval: weekly
     open-pull-requests-limit: 3
     groups:
-      python-minor-patch:
+      python-development:
+        patterns:
+          - pip
+          - pytest
+          - pytest-*
+          - reportlab
+          - hypothesis
+          - coverage
+          - ruff
+          - mypy
+          - bandit
+          - detect-secrets
+          - pip-audit
+          - pip-licenses
+          - mutmut
+          - build
+          - twine
+      python-runtime:
+        patterns: ['*']
         update-types: [minor, patch]
     commit-message:
       prefix: chore(deps)
@@ -16,7 +34,7 @@ updates:
       interval: weekly
     open-pull-requests-limit: 3
     groups:
-      actions-minor-patch:
-        update-types: [minor, patch]
+      actions:
+        patterns: ['*']
     commit-message:
       prefix: ci(deps)

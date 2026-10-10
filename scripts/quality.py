@@ -240,11 +240,12 @@ class Gate:
 
     def audit(self, runtime, label):
         # Audit resolved dependencies; the project's source has separate security checks.
-        frozen = self.run(f"{label}-freeze", [str(runtime), "-m", "pip", "freeze"])
+        # List versions even for editable installs; freeze can emit local/VCS URLs.
+        frozen = self.run(f"{label}-freeze", [str(runtime), "-m", "pip", "list", "--format=freeze"])
         requirements = self.output / f"{label}-requirements.txt"
         requirements.write_text(
             "\n".join(
-                line for line in frozen.splitlines() if not line.lower().startswith("pdf2mp3")
+                line for line in frozen.splitlines() if line.partition("==")[0].lower() != "pdf2mp3"
             )
             + "\n"
         )
@@ -337,6 +338,7 @@ def main():
         gate.preflight()
         gate.attempt("fast", gate.fast)
         if args.profile != "fast":
+            gate.attempt("audit-dev", lambda: gate.audit(PYTHON, "dev"))
             gate.attempt("coverage", gate.coverage)
             runtime = gate.attempt("packaging", gate.packaging)
             if runtime:

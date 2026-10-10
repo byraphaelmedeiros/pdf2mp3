@@ -78,7 +78,7 @@ from .text import preview as preview
 from .text import sanitize_for_tts as sanitize_for_tts
 from .text import split_into_chunks as split_into_chunks
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 # ---- Recommended female voices (unchanged logic/values) ----
 VOICE_BY_LANG = {

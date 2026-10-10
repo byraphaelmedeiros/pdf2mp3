@@ -1,7 +1,7 @@
 # Python API reference
 
 This reference covers the seven callables exported by `pdf2mp3.__all__` in the
-`2.0.0` package. Import them directly from `pdf2mp3`. Provider adapters
+`2.0.1` package. Import them directly from `pdf2mp3`. Provider adapters
 and `pdf2mp3.cli` are implementation modules, outside that exported contract.
 The CLI intentionally changed in v2; these Python callable contracts remain.
 

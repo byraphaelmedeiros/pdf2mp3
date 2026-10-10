@@ -1,6 +1,6 @@
 # Synthetic local demo
 
-This guide applies to a `2.0.0` source checkout with development dependencies.
+This guide applies to a `2.0.1` source checkout with development dependencies.
 Use only the generated synthetic samples. Existing personal PDFs in a checkout
 are not test fixtures. The commands below create local samples and run checks.
 
@@ -12,6 +12,7 @@ Install Python 3.12, FFmpeg and ffprobe. On macOS with Homebrew:
 brew install python@3.12 ffmpeg
 python3.12 -m venv .venv-dev
 source .venv-dev/bin/activate
+python -m pip install --upgrade 'pip>=26.2'
 python -m pip install -r requirements-dev.txt
 python -m pip check
 pdf2mp3 --help
@@ -131,6 +132,7 @@ In PowerShell:
 ```powershell
 py -3.12 -m venv .venv-dev
 .venv-dev\Scripts\Activate.ps1
+python -m pip install --upgrade 'pip>=26.2'
 python -m pip install -r requirements-dev.txt
 python -m pip check
 ffmpeg -version

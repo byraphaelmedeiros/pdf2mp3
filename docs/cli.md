@@ -1,7 +1,7 @@
 # CLI v2 contract
 
-This interface belongs to version `2.0.0`. Install it with
-`python -m pip install pdf2mp3==2.0.0`, or install a source checkout with
+This interface belongs to version `2.0.1`. Install it with
+`python -m pip install pdf2mp3==2.0.1`, or install a source checkout with
 `python -m pip install .`. Version 1.0.0 uses the previous flat CLI.
 Both `pdf2mp3` and `python -m pdf2mp3` identify themselves as `pdf2mp3` and expose
 identical help. No arguments prints help and exits 0. `--version` prints the

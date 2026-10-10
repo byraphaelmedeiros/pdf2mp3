@@ -157,7 +157,7 @@ def test_debug_does_not_expose_exception_values(synthetic_pdf, invoke, monkeypat
 def test_informational_commands(args, invoke, capsys):
     assert invoke(*args) == 0
     captured = capsys.readouterr()
-    assert captured.out.startswith("pdf2mp3 2.0.0" if args == ["--version"] else "usage: pdf2mp3")
+    assert captured.out.startswith("pdf2mp3 2.0.1" if args == ["--version"] else "usage: pdf2mp3")
     assert not captured.err
 
 

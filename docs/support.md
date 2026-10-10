@@ -1,6 +1,6 @@
 # Python and platform support
 
-Version `2.0.0` requires Python **3.10 or later**. The configured
+Version `2.0.1` requires Python **3.10 or later**. The configured
 matrix covers 3.10–3.14 on Linux, and 3.10/3.14 on macOS and Windows. Versions
 beyond that matrix are not yet verified. Canonical quality tooling runs on 3.12.
 
@@ -15,10 +15,10 @@ English and Brazilian Portuguese are the language presets, not translation.
 
 | Engine | Installation | External requirements |
 | --- | --- | --- |
-| Edge (default) | `python -m pip install pdf2mp3==2.0.0` | Network and available Microsoft voices |
-| gTTS | `python -m pip install 'pdf2mp3[gtts]==2.0.0'` | Network; Google speech endpoint |
-| OpenAI | `python -m pip install 'pdf2mp3[openai]==2.0.0'` | SDK 3.26.1+ with WebSockets, Realtime model access, `OPENAI_API_KEY`, possible charges; see [OpenAI narration](openai.md) |
-| pyttsx3 | `python -m pip install 'pdf2mp3[pyttsx3]==2.0.0'` | Working system speech engine/voices; PyObjC on macOS, eSpeak on Linux |
+| Edge (default) | `python -m pip install pdf2mp3==2.0.1` | Network and available Microsoft voices |
+| gTTS | `python -m pip install 'pdf2mp3[gtts]==2.0.1'` | Network; Google speech endpoint |
+| OpenAI | `python -m pip install 'pdf2mp3[openai]==2.0.1'` | SDK 3.26.1+ with WebSockets, Realtime model access, `OPENAI_API_KEY`, possible charges; see [OpenAI narration](openai.md) |
+| pyttsx3 | `python -m pip install 'pdf2mp3[pyttsx3]==2.0.1'` | Working system speech engine/voices; PyObjC on macOS, eSpeak on Linux |
 | macOS say | Base package | macOS `say` and installed voices |
 
 Base wheel/sdist installation, command help and synthetic conversions are checked

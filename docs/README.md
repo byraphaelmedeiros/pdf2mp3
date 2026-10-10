@@ -12,7 +12,7 @@
 - [Contribution guidelines](../CONTRIBUTING.md)
 - [Changelog](../CHANGELOG.md) and [security policy](../SECURITY.md)
 
-Documentation describes version 2.0.0. Check GitHub Actions and the package
+Documentation describes version 2.0.1. Check GitHub Actions and the package
 index for CI and publication evidence. The synthetic demo guide separates local
 speech validation from CI and platform claims.
 The [gTTS/Click security note](../SECURITY.md#known-development-dependency-finding)

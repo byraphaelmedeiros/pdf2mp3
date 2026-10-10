@@ -13,6 +13,7 @@ Install Python 3.12, FFmpeg and ffprobe, then from the repository root:
 ```bash
 python3.12 -m venv .venv-dev
 source .venv-dev/bin/activate
+python -m pip install --upgrade 'pip>=26.2'
 python -m pip install -r requirements-dev.txt
 python -m pytest -q
 python scripts/quality.py fast --base v1.0.0
@@ -85,6 +86,10 @@ access. Revisit required approvals if another maintainer receives write access.
 Release tags and PyPI publication are separate maintainer actions. The `pypi`
 environment requires the maintainer's manual approval; see [releasing](docs/releasing.md).
 Dependency bots propose changes through PRs and never merge or release them.
+Related development dependencies and workflow actions are grouped so compatibility
+changes can be reviewed together. Review major runtime dependency updates separately.
+When combining or replacing proposals, link the tested replacement before closing
+superseded PRs; an open proposal with a clear next step is normal maintenance.
 External fork workflows require maintainer approval before running. The
 maintainer should inspect workflow and executable changes before approving a run.
 
