@@ -1,7 +1,7 @@
 # Quality gates
 
 Use Python 3.12 and FFmpeg/ffprobe for the canonical QA environment. Install the
-pinned developer tools with `python -m pip install -r requirements-dev.txt`.
+pinned developer tools using the bootstrap steps in [CONTRIBUTING](../CONTRIBUTING.md).
 Runtime dependencies have compatible ranges in `pyproject.toml`; each gate
 records the exact resolution. There is no committed transitive lockfile.
 
@@ -20,16 +20,16 @@ as null (not applicable), not invented execution coverage.
 | Profile | Checks |
 | --- | --- |
 | fast | Git/base/FFmpeg and private-file preflight, whitespace, Ruff lint/format, strict production mypy, documentation, full deterministic pytest suite |
-| standard | Fast checks, subprocess-aware line and branch coverage, changed-code floors, wheel/sdist build and non-editable installs, real synthetic PDF/FFmpeg conversions, static security, secrets, resolved runtime plus optional-extra audit and licenses |
+| standard | Fast checks, subprocess-aware line and branch coverage, changed-code floors, wheel/sdist build and non-editable installs, real synthetic PDF/FFmpeg conversions, static security, secrets, resolved development/runtime/provider dependency audits and runtime licenses |
 | release | Standard plus scoped mutation, synthetic performance budgets, version/changelog consistency |
 
 CI also runs the [support matrix](support.md). A local release profile does not
 prove that remote matrix or live voice services passed. Stable publication has a
 separate final-tag check and consumes the gate's exact checksummed artifacts.
-The `ci-required` job provides a stable aggregate result for the full reusable
-quality workflow, including its OS/Python matrix. It succeeds only when that
-workflow succeeds. Branch rules must reference checks that have already run;
-keep the existing gate and matrix requirements until the aggregate is available.
+The required `ci-required` job aggregates the full reusable quality workflow,
+including its OS/Python matrix. It succeeds only when that workflow succeeds.
+The gate also downloads its uploaded artifact and verifies the source commit
+and both distribution hashes before a PR can be integrated.
 
 ## Tests and thresholds
 
@@ -84,8 +84,14 @@ random jitter, fixed executable argument arrays without a shell, and existing
 optional-bridge/cleanup handling; each has a local reason. Secret scanning covers
 tracked and new nonignored files. A reviewed checksum is not a credential.
 
-`pip-audit` checks the actual installed base and gTTS/OpenAI/pyttsx3 dependencies
-for the current platform. The project distribution itself is excluded from
+`pip-audit` checks the actual installed development environment, base package and
+gTTS/OpenAI/pyttsx3 dependencies for the current platform. Each audit includes
+installer/build tools reported by `pip list --format=freeze`, including pip itself.
+Editable dependencies are audited by their installed name and version, without
+following local paths or VCS URLs.
+The development audit runs independently of packaging; a failed build cannot
+hide its results. Fresh package-test environments bootstrap pip 26.2 or newer.
+The project distribution itself is excluded from
 the public advisory lookup, not its dependencies. **Any** advisory or unavailable
 required report fails; there are no vulnerability exemptions. Advisory services
 and package indexes require network. Other platforms need their own audit if

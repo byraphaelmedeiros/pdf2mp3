@@ -3,7 +3,7 @@
 The optional OpenAI adapter uses the **Realtime API over WebSocket** with
 `gpt-realtime-2.1-mini` by default. It preserves the `alloy` voice default and
 produces a single MP3 through local FFmpeg processing. Edge remains the default
-engine. This adapter is part of the optional `2.0.0` package integration,
+engine. This adapter is part of the optional `2.0.1` package integration,
 not the published 1.0.0 workflow.
 
 ## Installation and use
@@ -11,7 +11,7 @@ not the published 1.0.0 workflow.
 Install the provider extra:
 
 ```bash
-python -m pip install 'pdf2mp3[openai]==2.0.0'
+python -m pip install 'pdf2mp3[openai]==2.0.1'
 pdf2mp3 convert --help
 pdf2mp3 check --engine openai --json
 ```

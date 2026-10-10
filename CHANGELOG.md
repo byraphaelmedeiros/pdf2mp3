@@ -4,8 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.1] - 2026-10-10
+### Fixed
+- Update the optional developer environment to pytest 9.1.1 and pytest-asyncio
+  1.4.0 together, resolving CVE-2025-71176 without a dependency conflict.
+- Pin the developer installer to pip 26.2.1 and include development and installer
+  dependencies in the security gate. No vulnerability exemptions are added.
+
 ### Changed
+- Permit pdfminer.six 20260107 with its parser fixes; retain the secure minimum
+  version, Python 3.10+ support, CLI, exported API and narration defaults.
+- Update checkout and artifact actions while preserving full commit SHA pins;
+  group related dependency proposals for compatible maintenance updates.
 - Add contribution templates, ownership and maintainer-controlled integration
   guidance while retaining the project's voluntary collaboration principles.
 - Pin workflow actions to commit SHAs, prepare PyPI Trusted Publishing and require

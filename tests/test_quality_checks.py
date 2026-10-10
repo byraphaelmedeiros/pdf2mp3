@@ -194,6 +194,55 @@ def test_independent_checks_continue_without_erasing_failure(tmp_path, monkeypat
     assert gate.report["failures"] == [{"name": "audit", "reason": "synthetic advisory"}]
 
 
+def test_audit_includes_installer_and_development_tools(tmp_path, monkeypatch):
+    import json
+    import sys
+
+    from scripts import quality
+
+    monkeypatch.setattr(quality, "ROOT", tmp_path)
+    gate = quality.Gate("standard", "v1.0.0")
+
+    def run(name, command, **kwargs):
+        if name == "dev-freeze":
+            assert command == [sys.executable, "-m", "pip", "list", "--format=freeze"]
+            return "pip==26.2.1\npytest==9.1.1\npdf2mp3==2.0.1\npdf2mp3-helper==1.0\n"
+        requirements = gate.output / "dev-requirements.txt"
+        assert requirements.read_text() == "pip==26.2.1\npytest==9.1.1\npdf2mp3-helper==1.0\n"
+        (gate.output / "audit-dev.json").write_text(
+            json.dumps({"dependencies": [{"name": "pytest", "version": "9.1.1", "vulns": []}]})
+        )
+
+    monkeypatch.setattr(gate, "run", run)
+    gate.audit(sys.executable, "dev")
+    assert gate.report["stages"][-1]["name"] == "audit-dev-findings"
+
+
+def test_standard_audits_development_even_when_packaging_fails(tmp_path, monkeypatch):
+    import sys
+
+    from scripts import quality
+
+    monkeypatch.setattr(quality, "ROOT", tmp_path)
+    monkeypatch.setattr(sys, "argv", ["quality.py", "standard"])
+    calls = []
+    monkeypatch.setattr(
+        quality.Gate, "preflight", lambda self: self.report.update(source_sha256="x")
+    )
+    monkeypatch.setattr(quality.Gate, "fast", lambda self: None)
+    monkeypatch.setattr(quality.Gate, "coverage", lambda self: None)
+    monkeypatch.setattr(quality.Gate, "audit", lambda self, python, label: calls.append(label))
+
+    def packaging(self):
+        raise RuntimeError("synthetic build failure")
+
+    monkeypatch.setattr(quality.Gate, "packaging", packaging)
+    monkeypatch.setattr(quality.Gate, "run", lambda *args, **kwargs: "")
+    monkeypatch.setattr(quality, "fingerprint", lambda files: "x")
+    assert quality.main() == 1
+    assert calls == ["dev"]
+
+
 def test_performance_measurement_rejects_empty_results_and_over_budget():
     from scripts.performance_check import measure
 

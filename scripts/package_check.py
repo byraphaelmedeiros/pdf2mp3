@@ -226,6 +226,7 @@ def main():
             environment = output / ("runtime" if label == "wheel" else "sdist-runtime")
             venv.EnvBuilder(with_pip=True).create(environment)
             python = python_in(environment)
+            run([python, "-m", "pip", "install", "--upgrade", "pip>=26.2"], outside)
             run([python, "-m", "pip", "install", artifact], outside)
             smoke(python, outside / label)
     (output / "artifacts.json").write_text(

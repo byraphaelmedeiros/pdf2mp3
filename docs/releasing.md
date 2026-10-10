@@ -67,10 +67,8 @@ Prepare a draft release and attach all intended assets before publishing it.
 
 Actions are restricted to the actions used for CI, publishing and CodeQL. Keep
 action references pinned to full commit SHAs and review Dependabot updates.
-Enable the repository's mandatory SHA-pinning policy only after the pinned
-workflows have reached `main` and the managed CodeQL workflow is compatible.
-The existing ten quality checks remain required during migration. After a green
-PR demonstrates `ci-required`, that aggregate may replace them; it fails when
+The repository requires full commit SHA pins. The `ci-required` aggregate
+requires the release quality gate and all nine compatibility jobs; it fails when
 the reusable quality workflow fails, is cancelled or is skipped. Do not require
 release-only jobs (`version` or `publish`) for ordinary PRs.
 
