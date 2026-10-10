@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Add contribution templates, ownership and maintainer-controlled integration
+  guidance while retaining the project's voluntary collaboration principles.
+- Pin workflow actions to commit SHAs, prepare PyPI Trusted Publishing and require
+  release tags to identify the checked-out source already integrated into main.
+- Add a stable aggregate CI result and weekly dependency update proposals.
+
 ## [2.0.0] - 2026-10-08
 ### Changed
 - Store manual demo inputs/results under ignored `local/inputs/` and

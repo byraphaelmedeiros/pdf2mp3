@@ -60,3 +60,36 @@ actions requiring authorization when an agent is doing the work.
 For bugs, include the installed version, OS/Python/FFmpeg versions and minimal
 synthetic reproduction. Do not attach confidential PDFs or document content.
 Report vulnerabilities privately using [SECURITY.md](SECURITY.md).
+
+## Collaboration and integration
+
+Raphael Medeiros ([@byraphaelmedeiros](https://github.com/byraphaelmedeiros)) is
+the sole maintainer with write access. Anyone can open an issue, fork the project,
+propose a pull request or review a change. These activities do not grant merge
+or release permissions. Discuss substantial API, dependency or design changes
+in an issue before implementing them.
+
+Create a focused branch in your fork and open a PR against `main`. Use a
+Conventional Commit style PR title, such as `fix: handle empty documents`.
+Keep the PR current with `main`, respond to review and resolve conversations.
+The maintainer manually squash-merges after all required checks succeed;
+automatic merging is disabled. Branches in this repository are deleted after
+merge, while contributors manage their own fork branches. `main` is the only
+permanent development branch.
+
+Required approval count is zero while there is only one maintainer, because a
+PR author cannot approve their own PR. Write permissions still limit merging to
+the maintainer. `CODEOWNERS` requests their review and does not grant anyone
+access. Revisit required approvals if another maintainer receives write access.
+
+Release tags and PyPI publication are separate maintainer actions. The `pypi`
+environment requires the maintainer's manual approval; see [releasing](docs/releasing.md).
+Dependency bots propose changes through PRs and never merge or release them.
+External fork workflows require maintainer approval before running. The
+maintainer should inspect workflow and executable changes before approving a run.
+
+For triage, use the existing bug, enhancement, documentation and question labels;
+mark well-scoped newcomer tasks with `good first issue` only when guidance is
+available. Link fixes to issues and credit contributions through Git history and
+PR discussion. If a fix already shipped through another change, explain that
+with links before closing the superseded PR.

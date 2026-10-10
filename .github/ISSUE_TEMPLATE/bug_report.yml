@@ -1,0 +1,37 @@
+name: Bug report
+description: Report a reproducible problem using synthetic inputs.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Use synthetic PDFs and text only.
+        Remove credentials, private paths and document contents from logs.
+        Report vulnerabilities privately through the Security tab.
+  - type: input
+    id: version
+    attributes:
+      label: pdf2mp3 version
+      description: Output of pdf2mp3 --version, or the version from pip show pdf2mp3.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python, FFmpeg version, installation method and selected provider.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal command and steps using a synthetic PDF. Include safe diagnostic output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true

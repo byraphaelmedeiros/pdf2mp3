@@ -26,6 +26,10 @@ as null (not applicable), not invented execution coverage.
 CI also runs the [support matrix](support.md). A local release profile does not
 prove that remote matrix or live voice services passed. Stable publication has a
 separate final-tag check and consumes the gate's exact checksummed artifacts.
+The `ci-required` job provides a stable aggregate result for the full reusable
+quality workflow, including its OS/Python matrix. It succeeds only when that
+workflow succeeds. Branch rules must reference checks that have already run;
+keep the existing gate and matrix requirements until the aggregate is available.
 
 ## Tests and thresholds
 
