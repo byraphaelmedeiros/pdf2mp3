@@ -28,7 +28,7 @@ pyttsx3 = [
   "pyobjc>=10.3.1,<13; sys_platform == 'darwin'"
 ]
 dev = [
-  "pip==26.2.1", "pytest==9.1.1", "pytest-asyncio==1.4.0", "reportlab==4.4.4",
+  "pip==26.2.1", "pytest==9.1.1", "pytest-asyncio==1.4.0", "reportlab==5.0.1",
   "pytest-socket==0.8.1", "pytest-timeout==2.4.0", "hypothesis==6.168.5",
   "coverage==7.16.2", "ruff==0.16.10", "mypy==2.4.0",
   "bandit==1.9.4", "detect-secrets==1.5.0", "pip-audit==2.10.1",
