@@ -181,7 +181,7 @@ does not synthesize speech, contact voice services or write files. It reports
 configuration, text/chunk counts and whether conversion would send text
 externally. Passing this check does not establish remote voice availability or
 valid credentials. `--json` works before or after either subcommand; progress
-and diagnostics go to stderr. See [agent integration](https://github.com/byraphaelmedeiros/pdf2mp3/blob/v2.0.0/docs/cli.md#agent-integration-example).
+and diagnostics go to stderr. See the [CLI guide](https://github.com/byraphaelmedeiros/pdf2mp3/blob/v2.0.0/docs/cli.md).
 
 ## Limits and troubleshooting
 

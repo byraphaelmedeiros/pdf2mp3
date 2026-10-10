@@ -14,6 +14,7 @@ import zipfile
 from pathlib import Path
 
 from create_demo_pdf import create_demo_pdf
+from documentation_check import ignored_paths
 from pydub.generators import Sine
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -158,12 +159,23 @@ if os.environ.get("PDF2MP3_SMOKE_INTERRUPT") == "export":
 
 
 def check_public_contents(names):
+    # Setuptools metadata is generated for the sdist even though ignored in Git.
+    metadata = {"pdf2mp3.egg-info"} | {
+        f"pdf2mp3.egg-info/{name}"
+        for name in (
+            "PKG-INFO",
+            "SOURCES.txt",
+            "dependency_links.txt",
+            "entry_points.txt",
+            "requires.txt",
+            "top_level.txt",
+        )
+    }
+    source_names = [name for name in names if name not in metadata]
     if any(
-        Path(name).name in {"AGENTS.md", ".DS_Store"}
-        or "docs/development/" in name
-        or "local" in Path(name).parts
+        Path(name).name == ".DS_Store" or "docs/development/" in name or "local" in Path(name).parts
         for name in names
-    ):
+    ) or ignored_paths(ROOT, source_names):
         raise RuntimeError("package contains checkout-local files, instructions or notes")
 
 

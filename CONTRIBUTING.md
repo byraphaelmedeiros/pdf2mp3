@@ -52,8 +52,8 @@ review. Use Conventional Commits for authorized commits.
 
 Open a pull request from your branch with the problem, resulting behavior,
 commands actually run, outcomes and remaining limits. Report local checks, CI
-and publication separately. Commit, push, tag and release are maintainer/user
-actions requiring authorization when an agent is doing the work.
+and publication separately. The maintainer controls integration into `main`,
+release tags and package publication.
 
 ## Issues and security
 

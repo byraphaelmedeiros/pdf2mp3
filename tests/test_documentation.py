@@ -1,6 +1,7 @@
 """The documentation gate rejects broken references and undocumented interfaces."""
 
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -8,8 +9,14 @@ import pytest
 from scripts import documentation_check as checker
 
 
+def ignore_notes(root):
+    subprocess.run(["git", "init", "--quiet"], cwd=root, check=True, timeout=10)
+    (root / ".git/info/exclude").write_text("local-notes.md\n")
+
+
 @pytest.fixture
 def documented_project(tmp_path):
+    ignore_notes(tmp_path)
     (tmp_path / "docs").mkdir()
     (tmp_path / "pdf2mp3").mkdir()
     (tmp_path / "README.md").write_text("# Synthetic project\n[API](docs/api.md#helper)\n")
@@ -58,7 +65,7 @@ def test_broken_local_reference_fails(documented_project, target):
         ("docs/api.md#helper", True),
         ("docs/api.md#missing", False),
         ("missing.md", False),
-        ("AGENTS.md", False),
+        ("local-notes.md", False),
         ("local/inputs/private.txt", False),
         ("../outside.md", False),
     ],
@@ -88,17 +95,19 @@ def test_code_block_heading_is_not_a_link_anchor(documented_project):
         checker.check_documentation(documented_project)
 
 
-@pytest.mark.parametrize("target", ["AGENTS.md", "local/inputs/private.txt", "../outside.md"])
+@pytest.mark.parametrize("target", ["local-notes.md", "local/inputs/private.txt", "../outside.md"])
 def test_public_reference_cannot_point_to_private_or_external_checkout_files(
     documented_project, target
 ):
+    if target == "local-notes.md":
+        (documented_project / target).write_text("Synthetic private note\n")
     (documented_project / "README.md").write_text(f"[Private]({target})\n")
     with pytest.raises(ValueError, match="reference"):
         checker.check_documentation(documented_project)
 
 
 def test_internal_notes_are_outside_public_documentation(documented_project):
-    (documented_project / "AGENTS.md").write_text("[Private](missing.md)\n")
+    (documented_project / "local-notes.md").write_text("[Private](missing.md)\n")
     notes = documented_project / "docs/development"
     notes.mkdir()
     (notes / "notes.md").write_text("[Private](missing.md)\n")
@@ -144,14 +153,15 @@ def test_api_inventory_must_match_exports(documented_project, headings):
     [
         "local/inputs/sample.txt",
         "local/outputs/audio.wav",
-        "AGENTS.md",
+        "local-notes.md",
         "docs/development/note.md",
         ".DS_Store",
     ],
 )
-def test_tracked_private_file_fails_without_reading_it(path):
+def test_tracked_private_file_fails_without_reading_it(path, tmp_path):
+    ignore_notes(tmp_path)
     with pytest.raises(ValueError, match="checkout-local"):
-        checker.check_local_files([path])
+        checker.check_local_files([path], root=tmp_path)
     checker.check_local_files(["docs/local-demo.md", "tests/test_demo.py"])
 
 
@@ -181,3 +191,34 @@ def test_quality_preflight_rejects_private_index_before_fingerprinting(tmp_path,
     monkeypatch.setattr(quality, "fingerprint", lambda files: pytest.fail("read private input"))
     with pytest.raises(ValueError, match="checkout-local"):
         gate.preflight()
+
+
+def test_force_added_local_exclusion_is_rejected_without_reading(tmp_path, monkeypatch):
+    ignore_notes(tmp_path)
+    notes = tmp_path / "local-notes.md"
+    notes.write_text("Synthetic private note")
+    subprocess.run(["git", "add", "--force", notes.name], cwd=tmp_path, check=True, timeout=10)
+    original = Path.read_text
+
+    def guarded_read(path, *args, **kwargs):
+        if path == notes:
+            pytest.fail("read local note")
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded_read)
+    with pytest.raises(ValueError, match="checkout-local"):
+        checker.check_local_files([notes.name], root=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["local-notes.md", "docs/review.egg-info/local-notes.md", "pdf2mp3.egg-info/local-notes.md"],
+)
+def test_package_rejects_checkout_specific_exclusions(tmp_path, monkeypatch, name):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    import package_check
+
+    ignore_notes(tmp_path)
+    monkeypatch.setattr(package_check, "ROOT", tmp_path)
+    with pytest.raises(RuntimeError, match="checkout-local"):
+        package_check.check_public_contents([name])

@@ -124,7 +124,7 @@ class Gate:
         self.run("git-base", ["git", "rev-parse", "--verify", f"{self.base}^{{commit}}"])
         # Reject private index entries before fingerprinting or secret scanning reads files.
         tracked = self.run("tracked-files", ["git", "ls-files", "-z"]).split("\0")
-        self.evaluate("local-files", lambda: check_local_files(tracked))
+        self.evaluate("local-files", lambda: check_local_files(tracked, root=ROOT))
         files = self.run(
             "source-files", ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"]
         )

@@ -11,14 +11,36 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 
-def check_local_files(files: Iterable[str]) -> None:
+def ignored_paths(root: Path, names: Iterable[str]) -> set[str]:
+    """Resolve checkout exclusions without reading the excluded files."""
+    names = [name for name in names if name]
+    if not names or not (root / ".git").exists():
+        return set()
+    result = subprocess.run(
+        ["git", "check-ignore", "--no-index", "--stdin", "-z"],
+        input="\0".join(names) + "\0",
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+    if result.returncode not in (0, 1):
+        raise ValueError("cannot verify checkout-local exclusions")
+    return set(result.stdout.split("\0")) - {""}
+
+
+def check_local_files(files: Iterable[str], root: Path | None = None) -> None:
     """Reject protected paths from the Git index without opening their contents."""
+    files = list(files)
+    excluded = ignored_paths(root, files) if root is not None else set()
     for name in files:
         path = Path(name)
         if (
             path.parts[:1] == ("local",)
             or path.parts[:2] == ("docs", "development")
-            or path.name in {"AGENTS.md", ".DS_Store"}
+            or path.name == ".DS_Store"
+            or name in excluded
         ):
             raise ValueError(f"checkout-local file is tracked: {name}")
 
@@ -56,13 +78,15 @@ def check_documentation(root: Path) -> dict[str, int]:
     """Validate public references and declared interfaces without services/imports."""
     root = root.resolve()
     documents = sorted(
-        {path for path in root.glob("*.md") if path.name != "AGENTS.md"}
+        set(root.glob("*.md"))
         | {
             path
             for path in (root / "docs").rglob("*.md")
             if path.relative_to(root / "docs").parts[:1] != ("development",)
         }
     )
+    excluded = ignored_paths(root, (path.relative_to(root).as_posix() for path in documents))
+    documents = [path for path in documents if path.relative_to(root).as_posix() not in excluded]
     if not documents:
         raise ValueError("missing public documentation")
     for document in documents:
@@ -90,7 +114,7 @@ def check_documentation(root: Path) -> dict[str, int]:
                 )
             try:
                 relative = destination.relative_to(root)
-                check_local_files([relative.as_posix()])
+                check_local_files([relative.as_posix()], root=root)
             except ValueError:
                 raise ValueError(
                     f"private/outside reference in {document.relative_to(root)}"
@@ -150,7 +174,7 @@ def main() -> None:
     tracked = subprocess.run(
         ["git", "ls-files", "-z"], cwd=root, capture_output=True, text=True, check=True, timeout=10
     ).stdout.split("\0")
-    check_local_files(tracked)
+    check_local_files(tracked, root=root)
     print(json.dumps(check_documentation(root)))
 
 

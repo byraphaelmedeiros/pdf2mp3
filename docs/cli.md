@@ -13,7 +13,7 @@ python -m pdf2mp3 convert local/inputs/demo.pdf --rate -5% --volume=-10% --outpu
 pdf2mp3 convert local/inputs/demo.pdf --output local/outputs/demo-edge.mp3 --overwrite --quiet
 pdf2mp3 check
 pdf2mp3 check local/inputs/demo.pdf --engine edge --json
-pdf2mp3 --json convert local/inputs/demo.pdf --output local/outputs/demo-agent.mp3
+pdf2mp3 --json convert local/inputs/demo.pdf --output local/outputs/demo-json.mp3
 ```
 
 ## Preparation and provider options
@@ -124,7 +124,7 @@ tolerate additional data fields in future schema-compatible changes.
 | 7 | `output_failed` | Export/filesystem failure |
 | 130 | `interrupted` | Cancellation before completion |
 
-## Agent integration example
+## Automation example
 
 Use subprocess argument arrays, inspect both JSON and exit status, and select an
 explicit destination. Run `check` before authorizing external text processing.
