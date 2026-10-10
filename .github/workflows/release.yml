@@ -7,19 +7,26 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       - run: python -m pip install packaging
-      - name: Require final matching version and dated changelog
+      - name: Require final version, dated changelog and source integrated into main
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-        run: python scripts/release_check.py --tag "$RELEASE_TAG"
+        run: python scripts/release_check.py --tag "$RELEASE_TAG" --main-ref origin/main
 
   quality:
     needs: version
@@ -29,8 +36,11 @@ jobs:
     needs: [version, quality]
     runs-on: ubuntu-latest
     environment: pypi
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: quality-evidence
           path: evidence
@@ -56,6 +66,4 @@ jobs:
               shutil.copy2(source, destination / name)
           PY
       - name: Publish tested wheel and sdist
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1

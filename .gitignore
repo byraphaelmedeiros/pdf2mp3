@@ -61,6 +61,5 @@ mutants/
 /local/
 .DS_Store
 
-# Checkout-local agent instructions and development notes
-AGENTS.md
+# Local development notes
 /docs/development/

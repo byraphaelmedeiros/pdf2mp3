@@ -3,9 +3,41 @@
 import argparse
 import ast
 import re
+import subprocess
 from pathlib import Path
 
 from packaging.version import Version
+
+
+def validate_source(root: Path, tag: str, main_ref: str) -> None:
+    """Require the release checkout/tag to identify a commit integrated into main."""
+
+    def resolve(ref: str) -> str:
+        result = subprocess.run(
+            ["git", "rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        if result.returncode:
+            raise ValueError("cannot resolve release source; fetch main and tags first")
+        return result.stdout.strip()
+
+    source = resolve(f"refs/tags/{tag}")
+    if resolve("HEAD") != source:
+        raise ValueError("release tag differs from the checked-out commit")
+    main = resolve(main_ref)
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", source, main],
+        cwd=root,
+        capture_output=True,
+        timeout=10,
+        check=False,
+    )
+    if result.returncode:
+        raise ValueError("release source is not proven integrated into main")
 
 
 def validate(root, tag=None):
@@ -46,5 +78,12 @@ def validate(root, tag=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag")
+    parser.add_argument("--main-ref", help="Require the tag commit to be integrated into this ref")
     arguments = parser.parse_args()
-    print(validate(Path(__file__).resolve().parents[1], arguments.tag))
+    root = Path(__file__).resolve().parents[1]
+    if arguments.main_ref and not arguments.tag:
+        parser.error("--main-ref requires --tag")
+    version = validate(root, arguments.tag)
+    if arguments.main_ref:
+        validate_source(root, arguments.tag, arguments.main_ref)
+    print(version)
