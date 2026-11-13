@@ -150,13 +150,13 @@ def test_pyttsx3_macos_converts_aiff_to_mp3(
             Sine(440).to_audio_segment(duration=duration).export(path, format="aiff").close()
 
     monkeypatch.setattr(app.sys, "platform", "darwin")
-    monkeypatch.setitem(sys.modules, "objc", SimpleNamespace(__spec__=ModuleSpec("objc", None)))
-    engine = SimpleNamespace(save_to_file=save, runAndWait=run_and_wait)
-    monkeypatch.setitem(
-        sys.modules,
-        "pyttsx3",
-        SimpleNamespace(init=lambda: engine, __spec__=ModuleSpec("pyttsx3", None)),
+    # The simulated platform changes executable discovery on Windows.
+    monkeypatch.setattr(
+        cli, "_dependencies", lambda args: [{"name": "synthetic local engine", "ok": True}]
     )
+    monkeypatch.setitem(sys.modules, "objc", SimpleNamespace())
+    engine = SimpleNamespace(save_to_file=save, runAndWait=run_and_wait)
+    monkeypatch.setitem(sys.modules, "pyttsx3", SimpleNamespace(init=lambda: engine))
     output = tmp_path / "synthetic.mp3"
     original = synthetic_pdf.read_bytes()
     previous = b"previous synthetic audio"
