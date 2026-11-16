@@ -5,15 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.0.2] - 2026-11-16
 ### Fixed
 - Fix pyttsx3 conversion on macOS by decoding AIFF audio and processing all
   chunks in one speech loop.
 
 ### Changed
-- Update the Python setup action to 7.0.0 and the development-only ReportLab
-  PDF fixture generator to 5.0.1.
+- Allow PyObjC 13 for the optional pyttsx3 engine on macOS. Python 3.10
+  continues to resolve a compatible earlier version of PyObjC.
 - Update the development-only tools to pip 26.3, pytest 9.2.0, pytest-asyncio
   1.4.1.post1, ReportLab 5.1.0, Ruff 0.17.3, mypy 2.4.1, and mutmut 3.8.1.
+- Update the Python setup action to 7.1.0 and refresh the pinned PyPI publishing
+  action.
 
 ## [2.0.1] - 2026-10-10
 ### Fixed

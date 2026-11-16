@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pdf2mp3"
-version = "2.0.1"
+version = "2.0.2"
 description = "Convert PDFs to MP3 audiobooks using Microsoft Edge neural voices."
 readme = "README.md"
 license = "MIT"

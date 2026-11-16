@@ -1,6 +1,6 @@
 # Synthetic local demo
 
-This guide applies to a `2.0.1` source checkout with development dependencies.
+This guide applies to a `2.0.2` source checkout with development dependencies.
 Use only the generated synthetic samples. Existing personal PDFs in a checkout
 are not test fixtures. The commands below create local samples and run checks.
 
