@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fix pyttsx3 conversion on macOS by decoding AIFF audio and processing all
+  chunks in one speech loop.
+
 ### Changed
 - Update the Python setup action to 7.0.0 and the development-only ReportLab
   PDF fixture generator to 5.0.1.
