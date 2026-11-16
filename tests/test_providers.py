@@ -8,6 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 from pydub import AudioSegment
+from pydub.generators import Sine
 
 import pdf2mp3.pdf2mp3 as app
 from pdf2mp3 import cli
@@ -113,6 +114,7 @@ def test_local_engine_voice_selection_audio_and_cleanup(monkeypatch, platform, v
         assert builtins.objc is original_objc
     else:
         assert not hasattr(builtins, "objc")
+    assert len(app.synthesize_chunks_pyttsx3([], voice)) == 0
 
 
 @pytest.mark.parametrize("message", ["objc unavailable", "other failure"])
@@ -130,6 +132,62 @@ def test_local_engine_failure_cleans_file(monkeypatch, message):
     with pytest.raises(RuntimeError if "objc" in message else NameError):
         app.synthesize_chunks_pyttsx3(["synthetic"], None)
     assert paths and not paths[0].exists()
+
+
+@pytest.mark.parametrize("second_duration", [100, 0])
+def test_pyttsx3_macos_converts_aiff_to_mp3(
+    monkeypatch, synthetic_pdf, invoke, tmp_path, second_duration
+):
+    queued = []
+    runs = []
+
+    def save(text, path):
+        queued.append((text, Path(path)))
+
+    def run_and_wait():
+        runs.append(len(queued))
+        for (_, path), duration in zip(queued, (100, second_duration), strict=True):
+            Sine(440).to_audio_segment(duration=duration).export(path, format="aiff").close()
+
+    monkeypatch.setattr(app.sys, "platform", "darwin")
+    # The simulated platform changes executable discovery on Windows.
+    monkeypatch.setattr(
+        cli, "_dependencies", lambda args: [{"name": "synthetic local engine", "ok": True}]
+    )
+    monkeypatch.setitem(sys.modules, "objc", SimpleNamespace())
+    engine = SimpleNamespace(save_to_file=save, runAndWait=run_and_wait)
+    monkeypatch.setitem(sys.modules, "pyttsx3", SimpleNamespace(init=lambda: engine))
+    output = tmp_path / "synthetic.mp3"
+    original = synthetic_pdf.read_bytes()
+    previous = b"previous synthetic audio"
+    output.write_bytes(previous)
+
+    result = invoke(
+        "convert",
+        synthetic_pdf,
+        "--engine",
+        "pyttsx3",
+        "--max-chars",
+        28,
+        "-o",
+        output,
+        "--overwrite",
+    )
+    if second_duration:
+        assert result == 0
+        audio = AudioSegment.from_mp3(output)
+        assert 420 <= len(audio) <= 470
+        assert audio.rms > 0
+    else:
+        assert result == 5
+        assert output.read_bytes() == previous
+    assert [text for text, _ in queued] == [
+        "Synthetic first sentence.",
+        "Synthetic second sentence.",
+    ]
+    assert runs == [2]
+    assert synthetic_pdf.read_bytes() == original
+    assert all(not path.exists() for _, path in queued)
 
 
 def test_pyttsx3_empty_audio_fails_and_preserves_input_and_output(

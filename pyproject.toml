@@ -25,7 +25,7 @@ gtts = ["gTTS>=2.5.3,<3"]
 openai = ["openai[realtime]>=3.26.1,<4"]
 pyttsx3 = [
   "pyttsx3>=2.90,<3",
-  "pyobjc>=10.3.1,<13; sys_platform == 'darwin'"
+  "pyobjc>=10.3.1,<14; sys_platform == 'darwin'"
 ]
 dev = [
   "pip==26.2.2", "pytest==9.1.1", "pytest-asyncio==1.4.0", "reportlab==5.0.1",
