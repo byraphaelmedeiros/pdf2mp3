@@ -22,8 +22,9 @@ versions cannot pass the final tag check. Local gates never publish.
    successful jobs and artifact evidence. Only `byraphaelmedeiros` is a required
    reviewer. Self-review is allowed because there is one maintainer; administrator
    bypass is disabled. Deployment policy accepts only tags matching `v*`.
-   The publish job uses PyPI Trusted Publishing, with `id-token: write` scoped
-   to that job, and uploads the tested artifacts without a permanent API token.
+   The publish job uses PyPI Trusted Publishing to exchange a GitHub Actions
+   OpenID Connect (OIDC) identity for a short-lived PyPI credential. The workflow
+   grants `id-token: write` only to the publish job, which uploads the tested artifacts.
 5. Verify the resulting PyPI metadata/files against the retained artifact hashes
    and install/help checks from a new environment. A passed upload alone is not
    runtime verification. Never claim publication without registry readback.
@@ -32,8 +33,8 @@ versions cannot pass the final tag check. Local gates never publish.
 
 ## Trusted Publishing configuration
 
-Before using the OIDC workflow, the PyPI project owner must register and verify
-this publisher in the project's Publishing settings:
+The PyPI project owner manages the trusted publisher in the project's
+Publishing settings. The registration matches the GitHub Actions workflow.
 
 | Field | Value |
 | --- | --- |
@@ -43,12 +44,8 @@ this publisher in the project's Publishing settings:
 | Workflow filename | `release.yml` |
 | Environment | `pypi` |
 
-The registration is external configuration, not created by merging workflow
-files. Confirm it on PyPI before integrating the OIDC migration. Keep the legacy
-`PYPI_API_TOKEN` secret until the first explicitly authorized OIDC release has
-been verified, then revoke the corresponding PyPI token and delete the GitHub
-secret with maintainer authorization. The new workflow never reads that secret.
-Do not publish a throwaway version to test the migration.
+If any of these settings change, update and verify the publisher registration
+on PyPI before the next release.
 
 The maintainer controls release tags and publication. Contributors can propose
 release changes through PRs, but cannot merge them, create repository tags or
