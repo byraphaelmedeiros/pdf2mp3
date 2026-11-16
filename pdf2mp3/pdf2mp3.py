@@ -243,8 +243,9 @@ def synthesize_chunks_pyttsx3(
     except ImportError as exc:
         raise RuntimeError("pyttsx3 is not installed. Run: pip install pyttsx3") from exc
 
+    is_macos = sys.platform == "darwin"
     builtins_objc = None
-    if sys.platform == "darwin":
+    if is_macos:
         try:
             import builtins
 
@@ -258,7 +259,7 @@ def synthesize_chunks_pyttsx3(
     try:
         engine = pyttsx3.init()
     finally:
-        if sys.platform == "darwin" and "builtins" in locals():
+        if is_macos and "builtins" in locals():
             if builtins_objc is None:
                 try:
                     delattr(builtins, "objc")
@@ -275,32 +276,40 @@ def synthesize_chunks_pyttsx3(
             raise RuntimeError("Requested pyttsx3 voice is not installed.")
 
     full_audio = AudioSegment.empty()
-    for idx, ch in enumerate(chunks, start=1):
-        logging.getLogger("pdf2mp3").info(
-            "TTS chunk %d/%d (%d characters)", idx, len(chunks), len(ch)
-        )
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-            tmp_path = tmp.name
-        try:
-            engine.save_to_file(ch, tmp_path)
-            engine.runAndWait()
-            seg = AudioSegment.from_file(tmp_path, format="wav")
-            if not seg.raw_data:
-                raise RuntimeError("pyttsx3 returned empty audio; check the system voice engine")
-        except NameError as exc:
-            msg = str(exc)
-            if "objc" in msg.lower():
-                raise RuntimeError(
-                    "pyttsx3 on macOS requires pyobjc. Run: pip install pyobjc"
-                ) from exc
-            raise
-        finally:
+    if not chunks:
+        return full_audio
+    # The macOS driver writes AIFF and can return empty audio when restarted per chunk.
+    indexed_chunks = enumerate(chunks, start=1)
+    batches = (indexed_chunks,) if is_macos else ((chunk,) for chunk in indexed_chunks)
+    suffix = ".aiff" if is_macos else ".wav"
+    audio_format = None if is_macos else "wav"
+    for batch in batches:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as directory:
+            paths = []
             try:
-                Path(tmp_path).unlink(missing_ok=True)
-            except Exception:  # nosec B110 - preserve the provider error during best-effort cleanup
-                pass
-        full_audio += seg
-        full_audio += AudioSegment.silent(duration=pause_ms)
+                for idx, chunk in batch:
+                    logging.getLogger("pdf2mp3").info(
+                        "TTS chunk %d/%d (%d characters)", idx, len(chunks), len(chunk)
+                    )
+                    path = Path(directory) / f"{idx}{suffix}"
+                    path.touch()
+                    paths.append(path)
+                    engine.save_to_file(chunk, str(path))
+                engine.runAndWait()
+                for path in paths:
+                    segment = AudioSegment.from_file(path, format=audio_format)
+                    if not segment.raw_data:
+                        raise RuntimeError(
+                            "pyttsx3 returned empty audio; check the system voice engine"
+                        )
+                    full_audio += segment
+                    full_audio += AudioSegment.silent(duration=pause_ms)
+            except NameError as exc:
+                if "objc" in str(exc).lower():
+                    raise RuntimeError(
+                        "pyttsx3 on macOS requires pyobjc. Run: pip install pyobjc"
+                    ) from exc
+                raise
     return full_audio
 
 
